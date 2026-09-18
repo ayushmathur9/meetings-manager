@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-navy-50 text-navy-900 antialiased;
+}
+
+/* Focus states: replace the default browser outline with the teal focus-ring token */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(38, 166, 156, 0.35);
+  border-radius: 0.375rem;
+}
+
+/* Thin, subtle scrollbars for sidebar/tables/timeline panes */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: theme("colors.navy.200") transparent;
+}
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: theme("colors.navy.200");
+  border-radius: 9999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: theme("colors.navy.300");
+}
+
+/* Shimmer skeleton loading */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    theme("colors.navy.100") 25%,
+    theme("colors.navy.50") 50%,
+    theme("colors.navy.100") 75%
+  );
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none !important;
+  }
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-in-right {
+    animation: none !important;
+  }
+}
+
+/* Mapbox control/popup overrides to match the app palette */
+.mapboxgl-ctrl-group {
+  border-radius: 0.5rem !important;
+  box-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.06), 0 1px 3px 0 rgba(16, 24, 40, 0.1) !important;
+  overflow: hidden;
+}
+.mapboxgl-popup-content {
+  border-radius: 0.75rem !important;
+  padding: 0.75rem !important;
+  box-shadow: 0 4px 6px -2px rgba(16, 24, 40, 0.05), 0 12px 16px -4px rgba(16, 24, 40, 0.1) !important;
+}
+.mapboxgl-popup-tip {
+  display: none;
+}

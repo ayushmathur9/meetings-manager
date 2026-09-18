@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: meetings_manager_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: meetings_manager
+      POSTGRES_PASSWORD: meetings_manager
+      POSTGRES_DB: meetings_manager
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meetings_manager"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
