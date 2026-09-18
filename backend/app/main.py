@@ -48,9 +48,13 @@ app.include_router(activity.router)
 
 _error_logger = logging.getLogger("app.errors")
 _error_logger.setLevel(logging.ERROR)
-_file_handler = logging.FileHandler("server_errors.log", encoding="utf-8")
-_file_handler.setFormatter(logging.Formatter("%(asctime)s %(message)s"))
-_error_logger.addHandler(_file_handler)
+_log_formatter = logging.Formatter("%(asctime)s %(message)s")
+try:
+    _error_handler: logging.Handler = logging.FileHandler("server_errors.log", encoding="utf-8")
+except OSError:
+    _error_handler = logging.StreamHandler()
+_error_handler.setFormatter(_log_formatter)
+_error_logger.addHandler(_error_handler)
 
 
 @app.exception_handler(Exception)
