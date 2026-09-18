@@ -1,4 +1,5 @@
 import logging
+import os
 import traceback
 
 from fastapi import APIRouter, FastAPI, Request
@@ -34,10 +35,12 @@ app.add_middleware(
 )
 
 # Vercel's service rewrite forwards the full request path (including the
-# "/api/backend" prefix) rather than stripping it, so in production routes
-# are mounted under that prefix to match what actually arrives. Local dev
-# calls the backend directly without this prefix.
-api_router = APIRouter(prefix="/api/backend" if settings.environment == "production" else "")
+# "/api/backend" prefix) rather than stripping it, so on Vercel routes are
+# mounted under that prefix to match what actually arrives. Local dev calls
+# the backend directly without this prefix. VERCEL_ENV is auto-injected by
+# Vercel's platform (not user-configurable), so it's a reliable signal here.
+_on_vercel = os.environ.get("VERCEL_ENV") is not None
+api_router = APIRouter(prefix="/api/backend" if _on_vercel else "")
 api_router.include_router(auth.router)
 api_router.include_router(companies.router)
 api_router.include_router(contacts.router)
@@ -75,5 +78,6 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 
 @app.get("/health")
+@app.get("/api/backend/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
