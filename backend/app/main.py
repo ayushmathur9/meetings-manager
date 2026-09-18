@@ -1,7 +1,7 @@
 import logging
 import traceback
 
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -33,18 +33,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth.router)
-app.include_router(companies.router)
-app.include_router(contacts.router)
-app.include_router(imports.router)
-app.include_router(prospects.router)
-app.include_router(locations.router)
-app.include_router(meetings.router)
-app.include_router(routes_router.router)
-app.include_router(navigation.router)
-app.include_router(users.router)
-app.include_router(settings_router.router)
-app.include_router(activity.router)
+# Vercel's service rewrite forwards the full request path (including the
+# "/api/backend" prefix) rather than stripping it, so in production routes
+# are mounted under that prefix to match what actually arrives. Local dev
+# calls the backend directly without this prefix.
+api_router = APIRouter(prefix="/api/backend" if settings.environment == "production" else "")
+api_router.include_router(auth.router)
+api_router.include_router(companies.router)
+api_router.include_router(contacts.router)
+api_router.include_router(imports.router)
+api_router.include_router(prospects.router)
+api_router.include_router(locations.router)
+api_router.include_router(meetings.router)
+api_router.include_router(routes_router.router)
+api_router.include_router(navigation.router)
+api_router.include_router(users.router)
+api_router.include_router(settings_router.router)
+api_router.include_router(activity.router)
+app.include_router(api_router)
 
 _error_logger = logging.getLogger("app.errors")
 _error_logger.setLevel(logging.ERROR)
