@@ -16,17 +16,17 @@ def seed() -> None:
             admin = User(
                 name="Admin User",
                 email="admin@samitsolutions.com",
-                password_hash=hash_password("ChangeMe123!"),
+                password_hash=hash_password("Test@123"),
                 role=UserRole.ADMIN,
             )
             salesperson = User(
                 name="Sales Rep",
                 email="sales@samitsolutions.com",
-                password_hash=hash_password("ChangeMe123!"),
+                password_hash=hash_password("Test@123"),
                 role=UserRole.SALESPERSON,
             )
             db.add_all([admin, salesperson])
-            print("Created admin@samitsolutions.com and sales@samitsolutions.com (password: ChangeMe123!)")
+            print("Created admin@samitsolutions.com and sales@samitsolutions.com (password: Test@123)")
         else:
             print("Users already exist, skipping user seed.")
 
