@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +16,15 @@ class Settings(BaseSettings):
     database_url: str = (
         "postgresql+psycopg://meetings_manager:meetings_manager@localhost:5432/meetings_manager"
     )
+
+    @field_validator("database_url")
+    @classmethod
+    def _use_psycopg_driver(cls, value: str) -> str:
+        # Railway (and most managed Postgres providers) hand out plain
+        # postgresql:// URLs, but the app is built on the psycopg3 driver.
+        if value.startswith("postgresql://"):
+            return value.replace("postgresql://", "postgresql+psycopg://", 1)
+        return value
 
     jwt_secret: str = "change-me"
     jwt_algorithm: str = "HS256"
