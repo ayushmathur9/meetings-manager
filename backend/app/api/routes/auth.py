@@ -21,12 +21,16 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
 
     settings = get_settings()
     token = create_access_token(str(user.id), extra_claims={"role": user.role.value})
+    # Frontend and backend are deployed on different subdomains in production,
+    # so the cookie must be SameSite=None to be sent on cross-site requests;
+    # SameSite=None requires Secure, which only makes sense outside local dev.
+    is_cross_site = settings.environment != "development"
     response.set_cookie(
         key="access_token",
         value=token,
         httponly=True,
-        samesite="lax",
-        secure=settings.environment != "development",
+        samesite="none" if is_cross_site else "lax",
+        secure=is_cross_site,
         max_age=settings.access_token_expire_minutes * 60,
     )
     return TokenResponse(access_token=token, user=UserOut.model_validate(user))
