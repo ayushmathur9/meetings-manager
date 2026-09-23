@@ -1,6 +1,6 @@
 import logging
 import os
-import traceback
+import traceback  # noqa: F401 - used by exception handler below
 
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
