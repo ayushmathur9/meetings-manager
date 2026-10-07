@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
@@ -38,3 +39,5 @@ class ContactOut(ContactBase):
     company_id: uuid.UUID
     verification_status: ContactVerificationStatus
     source: str | None
+    bigin_contact_id: str | None = None
+    crm_deleted_at: datetime | None = None

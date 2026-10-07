@@ -13,15 +13,18 @@ const TITLES: { match: (path: string) => boolean; title: string }[] = [
   { match: (p) => p === "/admin/companies", title: "Companies" },
   { match: (p) => /^\/admin\/companies\/.+/.test(p), title: "Company" },
   { match: (p) => p === "/admin/meetings", title: "Meetings" },
+  { match: (p) => /^\/admin\/meetings\/.+/.test(p), title: "Meeting" },
   { match: (p) => p === "/sales/meetings", title: "My Meetings" },
   { match: (p) => /^\/sales\/meetings\/.+/.test(p), title: "Meeting" },
-  { match: (p) => p === "/admin/routes", title: "Routes" },
+  { match: (p) => p === "/admin/routes", title: "Route Planner" },
   { match: (p) => p === "/sales/route", title: "My Route" },
   { match: (p) => p === "/admin/imports", title: "Imports" },
   { match: (p) => p === "/admin/imports/new", title: "New Import" },
   { match: (p) => p === "/admin/team", title: "Team" },
   { match: (p) => p === "/admin/activity", title: "Activity" },
   { match: (p) => p === "/admin/settings", title: "Settings" },
+  { match: (p) => p === "/admin/crm-sync", title: "CRM Sync" },
+  { match: (p) => p.endsWith("/sop"), title: "SOP" },
 ];
 
 function titleFor(pathname: string) {

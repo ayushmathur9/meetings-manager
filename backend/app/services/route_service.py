@@ -114,6 +114,12 @@ class RouteService:
             stop = RouteStop(
                 route=route,
                 meeting_id=meeting.id,
+                company_id=meeting.company_id,
+                location_id=meeting.location_id,
+                company_name=meeting.company.name,
+                latitude=meeting.location.latitude,
+                longitude=meeting.location.longitude,
+                duration_minutes=meeting.duration_minutes,
                 sequence=seq,
                 arrival_time=arrival_time,
                 departure_time=departure_time,

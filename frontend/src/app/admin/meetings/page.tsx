@@ -82,7 +82,7 @@ export default function AdminMeetingsPage() {
           description="Schedule a meeting from a company's prospect profile."
         />
       ) : (
-        <MeetingTimeline meetings={lists[tab]} hrefFor={(m) => `/admin/companies/${m.company_id}`} />
+        <MeetingTimeline meetings={lists[tab]} hrefFor={(m) => `/admin/meetings/${m.id}`} />
       )}
     </div>
   );

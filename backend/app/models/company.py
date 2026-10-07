@@ -1,7 +1,7 @@
 import enum
 import uuid
 
-from sqlalchemy import Boolean, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -43,6 +43,20 @@ class Company(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     source_import_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("imports.id"), nullable=True
     )
+
+    # CRM (Zoho Bigin) linkage. bigin_account_id is the external identity —
+    # sync matches on it, never on the company name. The crm_* fields mirror
+    # Bigin and are overwritten by every sync (services/bigin_sync.py).
+    bigin_account_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
+    crm_owner_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    crm_owner_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    crm_owner_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    crm_status: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    crm_modified_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    crm_synced_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Set when the record was deleted in Bigin; the local row is kept so
+    # meetings/recordings attached to it are not lost.
+    crm_deleted_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     locations: Mapped[list["Location"]] = relationship(
         "Location", back_populates="company", cascade="all, delete-orphan"

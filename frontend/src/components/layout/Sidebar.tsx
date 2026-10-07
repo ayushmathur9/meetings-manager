@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ExternalLink, LogOut, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Avatar } from "@/components/ui/Avatar";
-import type { User } from "@/types";
-import type { NavGroup } from "./nav";
+import { appConfigApi } from "@/lib/api/integrations";
+import type { AppConfig, User } from "@/types";
+import type { NavGroup, NavItem } from "./nav";
 
 export function Sidebar({
   groups,
@@ -18,6 +20,11 @@ export function Sidebar({
   onLogout: () => void;
 }) {
   const pathname = usePathname();
+  const [config, setConfig] = useState<AppConfig | null>(null);
+
+  useEffect(() => {
+    appConfigApi.get().then(setConfig).catch(() => setConfig({ quote_builder_url: null }));
+  }, []);
 
   return (
     <aside className="flex w-60 shrink-0 flex-col bg-navy-950 text-white">
@@ -38,6 +45,9 @@ export function Sidebar({
             )}
             <div className="space-y-0.5">
               {group.items.map((item) => {
+                if (item.external) {
+                  return <ExternalNavLink key={item.href} item={item} url={config ? config.quote_builder_url : undefined} />;
+                }
                 const active = pathname === item.href;
                 const Icon = item.icon;
                 return (
@@ -83,5 +93,39 @@ export function Sidebar({
         </div>
       </div>
     </aside>
+  );
+}
+
+/** A sidebar entry for an external tool: opens in a new tab, marked with an
+ * external-link icon. Shown disabled (not hidden) when its URL isn't
+ * configured, so it's clear the tool exists but needs setting up. */
+function ExternalNavLink({ item, url }: { item: NavItem; url: string | null | undefined }) {
+  const Icon = item.icon;
+  const base = "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors";
+  if (!url) {
+    return (
+      <span
+        className={cn(base, "cursor-not-allowed text-navy-600")}
+        title={url === undefined ? "Loading..." : `${item.label} isn't configured yet — ask an administrator to set QUOTE_BUILDER_URL.`}
+        aria-disabled="true"
+      >
+        <Icon className="h-4 w-4 shrink-0 text-navy-700" strokeWidth={2} />
+        <span className="truncate">{item.label}</span>
+        {url === null && <span className="ml-auto text-[10px] uppercase tracking-wide text-navy-700">Not set</span>}
+      </span>
+    );
+  }
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`Open ${item.label} (external tool, new tab)`}
+      className={cn(base, "text-navy-400 hover:bg-white/5 hover:text-navy-100")}
+    >
+      <Icon className="h-4 w-4 shrink-0 text-navy-500" strokeWidth={2} />
+      <span className="truncate">{item.label}</span>
+      <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-navy-500" aria-label="Opens in a new tab" />
+    </a>
   );
 }

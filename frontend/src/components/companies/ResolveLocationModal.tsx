@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LoadingSkeleton } from "@/components/ui/Spinner";
+import { LocationSearchInput } from "@/components/locations/LocationSearchInput";
 import { companiesApi } from "@/lib/api/companies";
 import type { LocationCandidate } from "@/types";
 import { useToast } from "@/components/ui/Toast";
@@ -41,6 +42,19 @@ export function ResolveLocationModal({
       .finally(() => setLoading(false));
   }, [open, companyId]);
 
+  // A person searched for the right address themselves — put it at the top
+  // of the list (or select it if it's already there) so it can be applied.
+  function handleSearchSelect(candidate: LocationCandidate) {
+    const existing = candidates.findIndex((c) => c.place_id && c.place_id === candidate.place_id);
+    if (existing >= 0) {
+      setSelected(existing);
+      return;
+    }
+    setCandidates((prev) => [candidate, ...prev]);
+    setSelected(0);
+    setError(null);
+  }
+
   async function handleApply() {
     if (selected === null) return;
     setApplying(true);
@@ -72,13 +86,13 @@ export function ResolveLocationModal({
           <LoadingSkeleton className="h-16 w-full" />
           <LoadingSkeleton className="h-16 w-full" />
         </div>
-      ) : error ? (
+      ) : error && candidates.length === 0 ? (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-danger">{error}</p>
       ) : candidates.length === 0 ? (
         <EmptyState
           icon={<MapPin className="h-5 w-5" />}
           title="No matches found"
-          description="We couldn't find any candidate addresses for this company. Try updating its address first."
+          description="We couldn't find any candidate addresses for this company. Search for the correct address below."
         />
       ) : (
         <div className="scrollbar-thin max-h-80 space-y-2 overflow-y-auto">
@@ -95,6 +109,13 @@ export function ResolveLocationModal({
               <p className="mt-0.5 text-xs text-navy-400">Confidence: {c.confidence}</p>
             </button>
           ))}
+        </div>
+      )}
+
+      {!loading && (
+        <div className="mt-4">
+          <p className="mb-1.5 text-xs font-medium text-navy-500">Not listed? Search for the correct address</p>
+          <LocationSearchInput onSelect={handleSearchSelect} placeholder="Street address or business name..." />
         </div>
       )}
 

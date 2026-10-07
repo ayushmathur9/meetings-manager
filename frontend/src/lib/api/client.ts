@@ -1,10 +1,22 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001";
+
+export interface ApiErrorCompany {
+  company_id: string;
+  company_name: string;
+  address?: string | null;
+}
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  /** Machine-readable code for structured backend errors (e.g. "missing_coordinates"). */
+  code?: string;
+  /** Companies affected by the error, when the backend lists them. */
+  companies: ApiErrorCompany[];
+  constructor(status: number, message: string, code?: string, companies: ApiErrorCompany[] = []) {
     super(message);
     this.status = status;
+    this.code = code;
+    this.companies = companies;
   }
 }
 
@@ -21,13 +33,25 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!res.ok) {
     let message = res.statusText;
+    let code: string | undefined;
+    let companies: ApiErrorCompany[] = [];
     try {
       const data = await res.json();
-      message = data.detail || message;
+      const detail = data.detail;
+      if (typeof detail === "string") {
+        message = detail;
+      } else if (Array.isArray(detail)) {
+        // FastAPI request-validation errors
+        message = detail.map((d) => String(d.msg ?? "").replace(/^Value error, /, "")).filter(Boolean).join("; ") || message;
+      } else if (detail && typeof detail === "object") {
+        message = detail.message || message;
+        code = detail.code;
+        companies = detail.companies ?? [];
+      }
     } catch {
       // ignore
     }
-    throw new ApiError(res.status, message);
+    throw new ApiError(res.status, message, code, companies);
   }
 
   if (res.status === 204) {

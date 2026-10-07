@@ -347,41 +347,28 @@ class ImportService:
                     postal_code = postal_code or parsed["postal_code"]
 
             if verify_locations and (raw_address or city or state):
-                try:
-                    location, candidates, reason = location_service.verify_company_location(
-                        company_id=company.id,
-                        company_name=company.name,
-                        raw_address=raw_address,
-                        city=city,
-                        state=state,
-                        postal_code=postal_code,
-                        country=country,
-                    )
-                    if location is None:
-                        if not reason:
-                            reason = (
-                                f"{len(candidates)} possible match(es) found — none confident enough"
-                                if candidates
-                                else "No matching location found"
-                            )
-                        location_service.mark_needs_verification(
+                location = location_service.verify_or_flag(
+                    company_id=company.id,
+                    company_name=company.name,
+                    raw_address=raw_address,
+                    city=city,
+                    state=state,
+                    postal_code=postal_code,
+                    country=country,
+                )
+                if location is None:
+                    # No geocoder configured — keep the imported address as
+                    # UNVERIFIED; the background sweep verifies it later.
+                    self.db.add(
+                        Location(
                             company_id=company.id,
-                            raw_address=raw_address,
-                            notes=reason,
+                            is_primary=True,
+                            address_line_1=raw_address,
                             city=city,
                             state=state,
                             postal_code=postal_code,
-                            country=country,
+                            country=country or "USA",
                         )
-                except Exception as exc:
-                    location_service.mark_failed(
-                        company_id=company.id,
-                        raw_address=raw_address,
-                        notes=f"Location lookup failed: {exc}",
-                        city=city,
-                        state=state,
-                        postal_code=postal_code,
-                        country=country,
                     )
             elif raw_address or city or state:
                 self.db.add(

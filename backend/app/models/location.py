@@ -2,7 +2,7 @@ import enum
 import uuid
 
 from geoalchemy2 import Geometry
-from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, String
+from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -62,5 +62,10 @@ class Location(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     verification_notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     verified_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Automatic lookup attempts since the address last changed — drives the
+    # background retry backoff (services/location_sweep.py) so an address no
+    # geocoder can resolve isn't re-queried forever.
+    geocode_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    last_geocode_attempt_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     company: Mapped["Company"] = relationship("Company", back_populates="locations")

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query
 from app.api.error_handling import translate_provider_errors
 from app.core.deps import get_current_user
 from app.models.user import User
-from app.providers.location import get_location_provider
+from app.providers.location import get_geocoding_provider
 from app.schemas.location import LocationCandidatesOut
 
 router = APIRouter(prefix="/locations", tags=["locations"])
@@ -20,7 +20,7 @@ def search_locations(
     (so "Sam IT Solutions Office" resolves directly) and falls back to plain
     address geocoding when that finds nothing.
     """
-    provider = get_location_provider()
+    provider = get_geocoding_provider()
     with translate_provider_errors():
         result = provider.search_business(q)
         if not result.candidates:

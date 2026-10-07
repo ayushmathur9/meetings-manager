@@ -1,10 +1,13 @@
 from app.models.activity import Activity
 from app.models.company import Company
+from app.models.company_research import CompanyResearch, CompanyResearchSource
 from app.models.contact import Contact
+from app.models.crm_sync import BiginSyncRun, BiginSyncState
 from app.models.import_job import Import, ImportRow
 from app.models.location import Location
 from app.models.meeting import Meeting
 from app.models.prospect import Prospect
+from app.models.recording import MeetingRecording, MeetingTranscript
 from app.models.route import Route, RouteStop
 from app.models.settings import OrgSettings
 from app.models.user import User
@@ -12,6 +15,12 @@ from app.models.user import User
 __all__ = [
     "Activity",
     "Company",
+    "CompanyResearch",
+    "CompanyResearchSource",
+    "BiginSyncRun",
+    "BiginSyncState",
+    "MeetingRecording",
+    "MeetingTranscript",
     "Contact",
     "Import",
     "ImportRow",

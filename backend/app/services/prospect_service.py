@@ -48,6 +48,7 @@ class ProspectService:
                 Company.employee_count,
                 Company.website,
                 Prospect.assigned_user_id,
+                Prospect.priority,
                 assigned_user.name.label("assigned_user_name"),
                 Location.address_line_1,
                 Location.city,
@@ -63,6 +64,8 @@ class ProspectService:
             .outerjoin(Prospect, Prospect.company_id == Company.id)
             .outerjoin(assigned_user, assigned_user.id == Prospect.assigned_user_id)
             .outerjoin(Location, (Location.company_id == Company.id) & Location.is_primary.is_(True))
+            # Deleted in Bigin: kept for history, no longer a prospect.
+            .filter(Company.crm_deleted_at.is_(None))
         )
 
         if restrict_to_user is not None:

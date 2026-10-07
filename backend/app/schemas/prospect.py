@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.models.company import CompanyStatus
 from app.models.location import VerificationStatus
+from app.models.prospect import ProspectPriority
 
 
 class ProspectListItem(BaseModel):
@@ -19,6 +20,7 @@ class ProspectListItem(BaseModel):
     employee_count: int | None
     assigned_user_id: uuid.UUID | None
     assigned_user_name: str | None
+    priority: ProspectPriority | None = None
     address_line_1: str | None
     city: str | None
     state: str | None
@@ -57,6 +59,10 @@ class ProspectFilters(BaseModel):
 class BulkAssignRequest(BaseModel):
     company_ids: list[uuid.UUID]
     assigned_user_id: uuid.UUID
+
+
+class PriorityUpdate(BaseModel):
+    priority: ProspectPriority
 
 
 class BulkStatusRequest(BaseModel):

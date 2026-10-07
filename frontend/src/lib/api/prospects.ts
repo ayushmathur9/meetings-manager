@@ -1,5 +1,5 @@
 import { api } from "@/lib/api/client";
-import type { ProspectPage } from "@/types";
+import type { ProspectPage, ProspectPriority } from "@/types";
 
 export interface ProspectFilterParams {
   search?: string;
@@ -37,6 +37,8 @@ export const prospectsApi = {
     api.post<string[]>("/prospects/bulk-assign", { company_ids, assigned_user_id }),
   bulkStatus: (company_ids: string[], status: string) =>
     api.post<{ detail: string }>("/prospects/bulk-status", { company_ids, status }),
+  setPriority: (companyId: string, priority: ProspectPriority) =>
+    api.patch<{ detail: string }>(`/prospects/${companyId}/priority`, { priority }),
   assignSingle: (companyId: string, assignedUserId: string | null) =>
     api.patch<{ detail: string }>(
       `/prospects/${companyId}/assign${assignedUserId ? `?assigned_user_id=${assignedUserId}` : ""}`

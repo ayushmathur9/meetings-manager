@@ -1,16 +1,17 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status as http_status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, require_admin
 from app.db.session import get_db
-from app.models.company import CompanyStatus
+from app.models.company import Company, CompanyStatus
 from app.models.location import VerificationStatus
 from app.models.user import User, UserRole
 from app.schemas.prospect import (
     BulkAssignRequest,
     BulkStatusRequest,
+    PriorityUpdate,
     ProspectFilters,
     ProspectListItem,
     ProspectPage,
@@ -134,3 +135,29 @@ def assign_single(
     )
     db.commit()
     return {"detail": "Assignment updated"}
+
+
+@router.patch("/{company_id}/priority")
+def set_priority(
+    company_id: uuid.UUID,
+    payload: PriorityUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict[str, str]:
+    """Admins can set any prospect's priority; salespeople only their own."""
+    if db.get(Company, company_id) is None:
+        raise HTTPException(http_status.HTTP_404_NOT_FOUND, "Company not found")
+    service = ProspectService(db)
+    prospect = service.get_or_create_prospect(company_id)
+    if current_user.role != UserRole.ADMIN and prospect.assigned_user_id != current_user.id:
+        raise HTTPException(http_status.HTTP_403_FORBIDDEN, "You can only change priority on your own prospects")
+    prospect.priority = payload.priority
+    ActivityService(db).log(
+        user_id=current_user.id,
+        entity_type="prospect",
+        entity_id=company_id,
+        action="priority_changed",
+        metadata={"priority": payload.priority.value},
+    )
+    db.commit()
+    return {"detail": "Priority updated", "priority": payload.priority.value}

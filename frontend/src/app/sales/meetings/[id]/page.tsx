@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { LoadingSkeleton } from "@/components/ui/Spinner";
 import { useToast } from "@/components/ui/Toast";
+import { BusinessOverview } from "@/components/companies/BusinessOverview";
+import { MeetingRecorder } from "@/components/meetings/MeetingRecorder";
 
 export default function FieldMeetingPage() {
   const { id } = useParams<{ id: string }>();
@@ -192,6 +194,11 @@ export default function FieldMeetingPage() {
             </button>
           </div>
         )}
+      </div>
+
+      <div className="mt-4 space-y-4">
+        <MeetingRecorder meetingId={meeting.id} disabled={meeting.status === "cancelled" || meeting.status === "no_show"} />
+        <BusinessOverview companyId={meeting.company_id} />
       </div>
     </div>
   );

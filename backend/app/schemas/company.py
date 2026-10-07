@@ -30,6 +30,9 @@ class CompanyCreate(CompanyBase):
     country: str | None = None
 
 
+ADDRESS_FIELDS = ("address_line_1", "city", "state", "postal_code", "country")
+
+
 class CompanyUpdate(BaseModel):
     name: str | None = None
     legal_name: str | None = None
@@ -42,6 +45,12 @@ class CompanyUpdate(BaseModel):
     parent_company: str | None = None
     notes: str | None = None
     status: CompanyStatus | None = None
+    # Changing any of these replaces the primary location and re-verifies it.
+    address_line_1: str | None = None
+    city: str | None = None
+    state: str | None = None
+    postal_code: str | None = None
+    country: str | None = None
 
 
 class CompanyListItem(BaseModel):
@@ -63,6 +72,11 @@ class CompanyOut(CompanyBase):
     is_demo: bool
     created_at: datetime
     updated_at: datetime
+    bigin_account_id: str | None = None
+    crm_owner_name: str | None = None
+    crm_status: str | None = None
+    crm_synced_at: datetime | None = None
+    crm_deleted_at: datetime | None = None
     locations: list[LocationOut] = []
     contacts: list[ContactOut] = []
 

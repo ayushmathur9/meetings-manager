@@ -37,3 +37,6 @@ pnpm-debug.log*
 
 # Docker volumes
 pgdata/
+
+# Local recording storage (STORAGE_BACKEND=local) — meeting audio, never commit
+backend/storage/

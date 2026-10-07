@@ -4,3 +4,4 @@ __pycache__
 .env
 server_errors.log
 app/tests
+storage/

@@ -1,7 +1,7 @@
 import enum
 import uuid
 
-from sqlalchemy import Enum, ForeignKey, String
+from sqlalchemy import DateTime, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -44,5 +44,13 @@ class Contact(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         default=ContactVerificationStatus.IMPORTED,
     )
     source: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    # CRM (Zoho Bigin) linkage — see Company for the conventions.
+    bigin_contact_id: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True)
+    crm_owner_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    crm_owner_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    crm_modified_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    crm_synced_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    crm_deleted_at: Mapped[object | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     company: Mapped["Company"] = relationship("Company", back_populates="contacts")

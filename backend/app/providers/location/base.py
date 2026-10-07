@@ -11,6 +11,8 @@ is ambiguous, callers get an empty list / None rather than a guessed value.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+from app.services.normalization import build_address_string
+
 
 @dataclass
 class LocationCandidate:
@@ -79,6 +81,27 @@ class LocationProvider(ABC):
     def geocode_address(self, address: str) -> GeocodeResult:
         """Convert a free-text address into coordinates + a normalized address."""
         raise NotImplementedError
+
+    def geocode_structured(
+        self,
+        *,
+        street: str | None,
+        city: str | None = None,
+        state: str | None = None,
+        postal_code: str | None = None,
+        country: str | None = None,
+    ) -> GeocodeResult:
+        """Geocode an address whose parts are already known separately.
+
+        Providers that accept structured input (each part in its own field)
+        override this — it avoids the geocoder having to guess which words
+        are the street vs the city. The default just joins the parts and
+        falls back to free-text geocoding.
+        """
+        text = build_address_string(
+            address_line_1=street, city=city, state=state, postal_code=postal_code, country=country
+        )
+        return self.geocode_address(text or "")
 
     @abstractmethod
     def reverse_geocode(self, latitude: float, longitude: float) -> GeocodeResult:

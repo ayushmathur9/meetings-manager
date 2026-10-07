@@ -13,6 +13,7 @@ import type { CompanyOut, User } from "@/types";
 import { ScheduleMeetingModal } from "@/components/meetings/ScheduleMeetingModal";
 import { useToast } from "@/components/ui/Toast";
 import { LoadingSkeleton } from "@/components/ui/Spinner";
+import { BusinessOverview } from "@/components/companies/BusinessOverview";
 
 export function ProspectDrawer({
   companyId,
@@ -90,6 +91,8 @@ export function ProspectDrawer({
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone={statusTone(company.status)}>{company.status.replace("_", " ")}</Badge>
           </div>
+
+          <BusinessOverview companyId={company.id} compact />
 
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-navy-500">Location</h3>

@@ -20,6 +20,8 @@ import { Card, CardBody } from "@/components/ui/Card";
 import { MeetingTimeline } from "@/components/meetings/MeetingTimeline";
 import { useToast } from "@/components/ui/Toast";
 import { LoadingSkeleton } from "@/components/ui/Spinner";
+import { BusinessOverview } from "@/components/companies/BusinessOverview";
+import { formatDateTime } from "@/lib/format";
 
 export default function CompanyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -103,6 +105,11 @@ export default function CompanyDetailPage() {
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl font-semibold text-navy-900">{company.name}</h1>
               <Badge tone={statusTone(company.status)}>{company.status.replace("_", " ")}</Badge>
+              {company.bigin_account_id && (
+                <Badge tone={company.crm_deleted_at ? "danger" : "info"}>
+                  {company.crm_deleted_at ? "Deleted in Bigin" : "Synced from Bigin"}
+                </Badge>
+              )}
             </div>
             <p className="text-sm text-navy-500">{company.industry || "Industry unknown"}</p>
           </div>
@@ -128,6 +135,7 @@ export default function CompanyDetailPage() {
 
       {tab === "overview" && (
         <div className="space-y-5">
+          <BusinessOverview companyId={company.id} />
           <Section title="Location">
             <LocationStatus
               location={location}
@@ -141,7 +149,19 @@ export default function CompanyDetailPage() {
               <Row label="Website" value={company.website} />
               <Row label="Employees" value={company.employee_count?.toString()} />
               <Row label="Parent company" value={company.parent_company} icon={<Building2 className="h-3.5 w-3.5" />} />
+              {company.bigin_account_id && (
+                <>
+                  <Row label="CRM owner" value={company.crm_owner_name} />
+                  {company.crm_status && <Row label="CRM status" value={company.crm_status} />}
+                  <Row label="Last synced from Bigin" value={company.crm_synced_at ? formatDateTime(company.crm_synced_at) : null} />
+                </>
+              )}
             </dl>
+            {company.bigin_account_id && !company.crm_deleted_at && (
+              <p className="mt-3 text-xs text-navy-400">
+                Bigin is the source of truth for this company — edit CRM details in Bigin; changes sync here automatically.
+              </p>
+            )}
           </Section>
           {company.notes && (
             <Section title="Notes">
@@ -159,7 +179,10 @@ export default function CompanyDetailPage() {
             <div className="space-y-2">
               {company.contacts.map((c) => (
                 <div key={c.id} className="rounded-lg border border-navy-100 p-3 text-sm">
-                  <p className="font-medium text-navy-800">{c.full_name || "Unnamed contact"}</p>
+                  <p className="flex items-center gap-2 font-medium text-navy-800">
+                    {c.full_name || "Unnamed contact"}
+                    {c.bigin_contact_id && <span className="text-[10px] font-normal uppercase tracking-wide text-teal-700">Bigin</span>}
+                  </p>
                   <p className="text-navy-500">
                     {c.title}
                     {c.email && ` · ${c.email}`}
@@ -174,7 +197,7 @@ export default function CompanyDetailPage() {
 
       {tab === "meetings" && (
         <Section title={null}>
-          <MeetingTimeline meetings={meetings} hrefFor={() => "/admin/meetings"} />
+          <MeetingTimeline meetings={meetings} hrefFor={(m) => `/admin/meetings/${m.id}`} />
         </Section>
       )}
 

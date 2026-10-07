@@ -8,7 +8,7 @@ from app.core.deps import get_current_user
 from app.db.session import get_db
 from app.models.location import LocationSource
 from app.models.user import User
-from app.providers.location import get_location_provider
+from app.providers.location import get_geocoding_provider
 from app.providers.location.base import LocationCandidate
 from app.schemas.company import CompanyCreate, CompanyListItem, CompanyOut, CompanyUpdate, Page
 from app.schemas.location import LocationCandidatesOut, LocationResolveRequest
@@ -134,12 +134,13 @@ def get_location_candidates(
             status.HTTP_400_BAD_REQUEST, "This company has no address on file to search for"
         )
 
-    location_service = LocationService(db, get_location_provider())
+    location_service = LocationService(db, get_geocoding_provider())
     candidates = location_service.search_candidates(
         company_name=company.name,
         raw_address=raw_address,
         city=city,
         state=state,
+        postal_code=location.postal_code if location else None,
     )
     return LocationCandidatesOut(candidates=candidates)
 
@@ -156,7 +157,7 @@ def resolve_location(
     if company is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Company not found")
 
-    location_service = LocationService(db, get_location_provider())
+    location_service = LocationService(db, get_geocoding_provider())
     candidate = LocationCandidate(**payload.candidate.model_dump())
     location_service.apply_candidate(
         company_id=company.id,
